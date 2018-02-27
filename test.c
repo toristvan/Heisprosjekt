@@ -69,7 +69,31 @@ bool checkTimerFinished(){
 }
 
 // TIMER END 
+main(){
+//init
 
+
+while(1){
+if(elev_get_button_signal){
+	new_order(order)
+}
+if(orderfinished()){
+	remove_order();
+	elev_set_motor_direction(Queue[0].dir);
+}
+if (elev_get_stop_signal()) {
+            elev_set_motor_direction(DIRN_STOP);
+            break;
+}
+if(checktimer()){
+	executeorder();
+}
+
+if(Queue[0].etasjestopp[currentfloor]){
+	 elev_set_motor_direction(DIRN_STOP);
+	//settimer
+	}
+}
 
 
 

@@ -5,7 +5,7 @@
 
 int main() {
     // Initialize hardware
-    if (!elev_init()) {
+    if (!elev_init()) { //skrur av alle lysene
         printf("Unable to initialize elevator hardware!\n");
         return 1;
     }
@@ -13,7 +13,7 @@ int main() {
     printf("Press STOP button to stop elevator and exit program.\n");
 
     elev_set_motor_direction(DIRN_STOP);
-
+    currentFloor=1;
     while (1) {
       newOrder();
       if (elev_get_stop_signal()) {
@@ -22,7 +22,7 @@ int main() {
           }
 
       if(elev_get_floor_sensor_signal()>-1){
-          printf("ja                 ");
+          //printf("ja                 ");
           currentFloor =  elev_get_floor_sensor_signal()+1; //elev_set_floor_indicator()
           }
       if(checkTimerFinished()){
@@ -30,13 +30,18 @@ int main() {
           executeOrder();
           }
       //stopElev();
-      if(orderFinished()){
+      if(orderFinished() && queue[0].valid){//endret her 
           //printf("order finsihed");
-          //removeOrder(0);
+          removeOrder(0);
           //elev_set_motor_direction(queue[0].order.dir);
           }
+    if(queue[0].etasjestopp[currentFloor-1] || (MOTORDIR == DIRN_STOP && elev_get_obstruction_signal())){
+           printf("currentFloor: %d\n", currentFloor);
+     stopElev();
+            }
 
       }
+      printf("sizeof(queue): %d\n", sizeof(queue));
       printf("currentFloor: %d\n", currentFloor);
       printf("etasjestopp[0]: %d\n", queue[0].etasjestopp[0]);
       printf("etasjestopp[1]: %d\n", queue[0].etasjestopp[1]);

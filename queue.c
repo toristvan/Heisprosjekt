@@ -89,7 +89,7 @@ void removeOrder(int index)
     queue[i-1]=queue[i];
     j=i;
   }
-  queue[j].order.dir=NONE; queue[j].order.floor=0;queue[j].valid=0;memset(queue[i].etasjestopp,0,sizeof(queue[i].etasjestopp);
+  queue[j].order.dir=NONE; queue[j].order.floor=0;queue[j].valid=0;memset(queue[j].etasjestopp,0,sizeof(queue[j].etasjestopp));
 }
 
 
@@ -166,11 +166,11 @@ void optimizeQueue()
       if (queue[i].order.dir==UP && queue[i].order.floor<=queue[0].order.floor &&currentFloor<queue[i].order.floor){
                   queue[0].etasjestopp[queue[i].order.floor-1]=1;
           return;
-        }
-        else if (queue[i].order.dir==DOWN && queue[i].order.floor>=queue[0].order.floor && currentFloor>queue[i].order.floor){
+      }
+      else if (queue[i].order.dir==DOWN && queue[i].order.floor>=queue[0].order.floor && currentFloor>queue[i].order.floor){
           queue[0].etasjestopp[queue[i].order.floor-1]=1;
           return;
-        }
+      }
     }
   }
 }

@@ -1,25 +1,24 @@
-#include "elev.h"
+#include "queue.h"
 #include <stdio.h>
 
 
 
 int main(){
 
-elev_Init();
+elev_init();
 
 while(1){
 
-if(elev_get_button_signal()){
-	new_order();
-}
+newOrder();
+
 if(elev_get_floor_sensor_signal()>-1){
-	currentfloor = 	elev_get_floor_sensor_signal()+1;
-	elev_set_floor_indicator()
+	currentFloor = 	elev_get_floor_sensor_signal()+1;
+	//elev_set_floor_indicator()
 }
 	
 if(orderfinished()){ 
 	remove_order();
-	elev_set_motor_direction(Queue[0].dir);
+	elev_set_motor_direction(queue[0].order.dir);
 }
 if (elev_get_stop_signal()) {
         elev_set_motor_direction(DIRN_STOP);
@@ -32,10 +31,11 @@ if(checktimer()){
 	executeorder();
 }
 
-if(Queue[0].etasjestopp[currentfloor-1] || (MOTORDIR == DIRN_STOP && elev_get_obstruction_signal())){
+if(queue[0].etasjestopp[currentFloor-1] || (MOTORDIR == DIRN_STOP && elev_get_obstruction_signal())){
 	 stopElev();
 	}
 }
+return 0;
 
-
+}
 }

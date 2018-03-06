@@ -23,7 +23,7 @@ int main(){
 	//elev_set_floor_indicator()
 }
 
-if(orderfinished()){
+if(orderFinished()){
 	removeOrder(0);
 	elev_set_motor_direction(queue[0].order.dir);
 }

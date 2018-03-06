@@ -1,12 +1,14 @@
 #include "queue.h"
 
 
-void queueInit(){
+void queueInit()
+{
   for(int i=0;i<queue.length();i++){
   queue[i].order.dir=0; queue[i].order.floor=0;queue[i].valid=0;queue[i].etasjestopp=[0,0,0,0];
   }
 }
-void addExternalOrder(order_type neworder){
+void addExternalOrder(order_type neworder)
+{
   for (int i=0;i<queue.length();i++){
     if (!queue[i].valid){
       queue[i].order=neworder;
@@ -29,7 +31,8 @@ void addExternalOrder(order_type neworder){
     }
 }
 
-void addInternalOrder(int floor){
+void addInternalOrder(int floor)
+{
   if (queue[0].dir==DOWN && floor>=currentFloor) {//assert
     return;
   }
@@ -39,11 +42,13 @@ void addInternalOrder(int floor){
   queue[0].etasjestopp[floor-1]=1;
 }
 
-int orderFinished(){
+int orderFinished()
+{
   return (queue[0].etasjestopp==[0,0,0,0]);
 }
 
-void removeOrder(int index){
+void removeOrder(int index)
+{
   for (int i=index+1;i<queue.length();i++){
     queue[i-1]=queue[i];
   }
@@ -51,7 +56,8 @@ void removeOrder(int index){
 }
 
 
-void executeOrder(){
+void executeOrder()
+{
   if(queue[0].etasjestopp[currentFloor-1]){
     elev_set_motor_direction(queue[0].order.dir)
   }
@@ -71,7 +77,8 @@ void executeOrder(){
   }
 }
 
-void stopElev(
+void stopElev()
+(
   if(queue[0].etasjestopp[currentFloor-1]){
     elev_set_motor_direction(0);
     elev_set_door_open_lamp(1);
@@ -86,8 +93,9 @@ void stopElev(
     elev_set_button_lamp(BUTTON_COMMAND,currentFloor-1,0);
   }
 )
-void newOrder(){    //tar utgangspunkt i at kun én knapp trykkes inn om gangen.
-  order_type new_order;
+void newOrder()
+{    //tar utgangspunkt i at kun én knapp trykkes inn om gangen.
+  struct order_type new_order;
   for (int floor=0;floor<4;floor++){
     for (int button=0;button<3;button++){
       if(button_channel_matrix[floor][button]){
@@ -96,16 +104,13 @@ void newOrder(){    //tar utgangspunkt i at kun én knapp trykkes inn om gangen.
         if(button==0){
           new_order.dir=UP;
           addExternalOrder(new_order);
-          break;
         }
         else if(button==1){
           new_order.dir=DOWN;
           addExternalOrder(new_order);
-          break;
         }else{
           new_order.dir=NONE;
           addInternalOrder(floor);
-          break;
         }
       }
     }
@@ -114,7 +119,8 @@ void newOrder(){    //tar utgangspunkt i at kun én knapp trykkes inn om gangen.
 }
 
 
-void optimizeQueue(){ //legg bare til i queue[0]
+void optimizeQueue()
+{ //legg bare til i queue[0]
   for (int i=1;i<queue.length();i++){
     if(queue[0]==queue[i]){
     }

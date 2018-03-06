@@ -1,6 +1,6 @@
 #include "elev.h"
 #include "io.h"
-#include "channel.h"
+#include "channels.h"
 #include <stdio.h>
 #include <sys/time.h>
 #include <string.h>
@@ -28,6 +28,9 @@ struct order_type{ //typedef struct
 
  struct internal_order queue[10];
 
+ double get_time(void);
+ void startTimer(double dur);
+ int checkTimerFinished();
  void queueInit();
  void addExternalOrder(struct order_type neworder);
  void addInternalOrder(int floor);

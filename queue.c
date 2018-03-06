@@ -160,16 +160,19 @@ void optimizeQueue()
 { //legg bare til i queue[0]
   for (int i=1;i<sizeof(queue);i++){
     if(queueEqual(queue[0],queue[i])){
+      removeOrder(i);
       break;
     }
     if (queue[0].order.dir==queue[i].order.dir){
       if (queue[i].order.dir==UP && queue[i].order.floor<=queue[0].order.floor &&currentFloor<queue[i].order.floor){
-                  queue[0].etasjestopp[queue[i].order.floor-1]=1;
-          return;
+          queue[0].etasjestopp[queue[i].order.floor-1]=1;
+          removeOrder(i);
+          break;
       }
       else if (queue[i].order.dir==DOWN && queue[i].order.floor>=queue[0].order.floor && currentFloor>queue[i].order.floor){
           queue[0].etasjestopp[queue[i].order.floor-1]=1;
-          return;
+          removeOrder(i);
+          break;
       }
     }
   }

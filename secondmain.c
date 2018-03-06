@@ -5,35 +5,42 @@
 
 int main(){
 
-elev_init();
+  if (!elev_init()) {
+      printf("Unable to initialize elevator hardware!\n");
+      return 1;
+  }
 
-while(1){
+  printf("Press STOP button to stop elevator and exit program.\n");
 
-newOrder();
+  elev_set_motor_direction(DIRN_UP);
 
-if(elev_get_floor_sensor_signal()>-1){
+  while(1){
+
+    newOrder();
+
+    if(elev_get_floor_sensor_signal()>-1){
 	currentFloor = 	elev_get_floor_sensor_signal()+1;
 	//elev_set_floor_indicator()
 }
-	
-if(orderfinished()){ 
-	remove_order();
+
+if(orderfinished()){
+	removeOrder(0);
 	elev_set_motor_direction(queue[0].order.dir);
 }
 if (elev_get_stop_signal()) {
         elev_set_motor_direction(DIRN_STOP);
 	queueInit();
-	   
+
             break;
 }
-if(checktimer()){
+if(checkTimerFinished()){
 	elev_set_door_open_lamp(0);
-	executeorder();
+	executeOrder();
 }
 
 if(queue[0].etasjestopp[currentFloor-1] || (MOTORDIR == DIRN_STOP && elev_get_obstruction_signal())){
 	 stopElev();
-	}
+}
 }
 return 0;
 

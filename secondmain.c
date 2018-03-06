@@ -38,4 +38,3 @@ if(queue[0].etasjestopp[currentFloor-1] || (MOTORDIR == DIRN_STOP && elev_get_ob
 return 0;
 
 }
-}

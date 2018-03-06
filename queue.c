@@ -1,5 +1,25 @@
 #include "queue.h"
 
+
+double get_time(void){
+	struct timeval time;
+	gettimeofday(&time, NULL);
+	return (double)time.tv_sec + (double)time.tv_usec*.000001;
+}
+static int run;
+static double endtime;
+
+void startTimer(double dur){
+	endtime=get_time()+dur;
+}
+
+int checkTimerFinished(){
+	if(get_time()<endtime){
+	return 0;
+	}
+	return 1;
+}
+
 int orderEqual(struct order_type o1, struct order_type o2){
   if (o1.dir==o2.dir && o1.floor==o2.floor){
     return 1;
@@ -19,7 +39,7 @@ int queueEqual(struct internal_order q1,struct internal_order q2){
 void queueInit()
 {
   for(int i=0;i<sizeof(queue);i++){
-  queue[i].order.dir=0; queue[i].order.floor=0;queue[i].valid=0;queue[i].etasjestopp={0};
+  queue[i].order.dir=0; queue[i].order.floor=0;queue[i].valid=0;memset(queue[i].etasjestopp,0,sizeof(queue[i].etasjestopp));
   }
 }
 void addExternalOrder(struct order_type neworder)
@@ -69,7 +89,7 @@ void removeOrder(int index)
     queue[i-1]=queue[i];
     j=i;
   }
-  queue[j].order.dir=NONE; queue[j].order.floor=0;queue[j].valid=0;queue[j].etasjestopp={0};
+  queue[j].order.dir=NONE; queue[j].order.floor=0;queue[j].valid=0;memset(queue[i].etasjestopp,0,sizeof(queue[i].etasjestopp);
 }
 
 
@@ -99,7 +119,7 @@ void stopElev()
   if(queue[0].etasjestopp[currentFloor-1]){
     elev_set_motor_direction(0);
     elev_set_door_open_lamp(1);
-    start_timer();
+    startTimer();
     queue[0].etasjestopp[currentFloor-1]=0;
     if(queue[0].order.dir==-1){
       elev_set_button_lamp(BUTTON_CALL_DOWN,currentFloor-1,0);

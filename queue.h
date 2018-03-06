@@ -1,8 +1,9 @@
 #include "elev.h"
 #include <stdio.h>
 #include <sys/time.h>
-double get_time(void);
 
+
+double get_time(void);
 
 int currentFloor;
 typedef enum tag_order_dir{

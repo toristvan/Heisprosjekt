@@ -4,16 +4,16 @@ double get_time(void){
 	gettimeofday(&time, NULL);
 	return (double)time.tv_sec + (double)time.tv_usec*.000001;
 }
-static bool run;
+static int run;
 static double endtime;
 
 void startTimer(double dur){
 	endtime=get_time()+dur;
 }
 
-bool checkTimerFinished(){
+int checkTimerFinished(){
 	if(get_time()<endtime){
-	return false;
+	return 0;
 	}
-	return true;
+	return 1;
 }

@@ -1,23 +1,6 @@
-#include
+#include "queue.h"
 
-typedef enum tag_order_dir{
-  DOWN=-1,
-  NONE=0,
-  UP=1
-}order_dir_t
 
-struct order_type{
-   order_dir_t dir;
-   int floor;
- }
-
- struct internal_order{
-   order_type order;
-   bool etasjestopp[4];
-   bool valid;
- }
-
-internal_order queue[10];
 void queueInit(){
   for(int i=0;i<queue.length();i++){
   queue[i].order.dir=0; queue[i].order.floor=0;queue[i].valid=0;queue[i].etasjestopp=[0,0,0,0];
@@ -56,7 +39,7 @@ void addInternalOrder(int floor){
   queue[0].etasjestopp[floor-1]=1;
 }
 
-bool orderFinished(){
+int orderFinished(){
   return (queue[0].etasjestopp==[0,0,0,0]);
 }
 
@@ -67,40 +50,6 @@ void removeOrder(int index){
   queue[i].order.dir=NONE; queue[i].order.floor=0;queue[i].valid=0;
 }
 
-//void executeOrderfail(){
-/* while()
-  for (int i=0;i<4;i++){          //evt while;
-    if(order[0].etasjestopp[i]){
-      break;
-    }
-    removeOrder();
-    i=0;
-  }
-  if (i+1-currentFloor>0){
-    elev_set_motor_direction(1);
-  }
-  else if(i+1-currentFloor<0){
-    elev_set_motor_direction(-1);
-  }
-  else{
-    elev_set_motor_direction(0);
-    elev_set_door_open_lamp();
-    //start_timer();
-    //check_next_stop;
-    //runstopproocedure;
-  }
-  if(etasjestopp[currentFloor-1]){
-    elev_set_motor_direction(0);
-    //runstopproocedure;
-  }
-  if(currentFloor==4){
-    elev_set_motor_direction(-1);
-  }
-  if(currentFloor==1){
-    elev_set_motor_direction(1);
-  }
-
-}*/
 
 void executeOrder(){
   if(queue[0].etasjestopp[currentFloor-1]){
@@ -181,22 +130,3 @@ void optimizeQueue(){ //legg bare til i queue[0]
     }
   }
 }
-
-double get_time(void){
-	struct timeval time;
-	gettimeofday(&time, NULL);
-	return (double)time.tv_sec + (double)time.tv_usec*.000001;
-}
-static int run;
-static double endtime;
-
-void startTimer(double dur){
-	endtime=get_time()+dur;
-}
-
-int checkTimerFinished(){
-	if(get_time()<endtime){
-	return 0;
-	}
-	return 1;
-}  

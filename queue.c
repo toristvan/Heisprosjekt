@@ -86,10 +86,13 @@ void removeOrder(int index)
 {
   int j=0;
   for (int i=index+1;i<sizeof(queue);i++){
-    queue[i-1]=queue[i];
+    queue[i-1].order.dir=queue[i].order.dir;
+    queue[i-1].order.floor=queue[i].order.floor;
+    queue[i-1].etasjestopp=queue[i].etasjestopp;
+    queue[i-1].valid=queue[i].valid;
     j=i;
   }
-  queue[j].order.dir=NONE; queue[j].order.floor=0;queue[j].valid=0;memset(queue[j].etasjestopp,0,sizeof(queue[j].etasjestopp));
+  queue[j].order.dir=0; queue[j].order.floor=0;queue[j].valid=0;memset(queue[j].etasjestopp,0,sizeof(queue[j].etasjestopp));
 }
 
 
@@ -135,7 +138,7 @@ void newOrder()
   struct order_type new_order;
   for (int floor=0;floor<4;floor++){
     for (elev_button_type_t button=BUTTON_CALL_UP;button<=BUTTON_COMMAND;button++){
-      if((button==BUTTON_CALL_DOWN && floor==0)||(button==BUTTON_CALL_UP && floor==3)){
+      if((button==BUTTON_CALL_DOWN&&floor==0)||(button==BUTTON_CALL_UP&&floor==3)){
         continue;
       }
       if(elev_get_button_signal(button,floor)){
@@ -178,5 +181,23 @@ void optimizeQueue()
           break;
       }
     }
+  }
+}
+
+void emergencyStop(){
+  elev_motor_direction_t prevDir=io_read_bit(MOTORDIR);
+  elev_set_stop_lamp(); //fjern stopplys
+  elev_set_motor_direction(0);
+  queueInit();
+  for (int floor=0;floor<4;floor++){
+    for (elev_button_type_t button=BUTTON_CALL_UP; button<=BUTTON_COMMAND;button++){
+      if((button==BUTTON_CALL_DOWN && floor==0)||(button==BUTTON_CALL_UP && floor==3)){
+        continue;
+      }
+      elev_set_button_lamp(button, floor, 0);
+    }
+  }
+  if(elev_get_floor_sensor_signal()>-1){
+    elev_set_door_open_lamp();
   }
 }

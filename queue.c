@@ -6,7 +6,7 @@ double get_time(void){
 	gettimeofday(&time, NULL);
 	return (double)time.tv_sec + (double)time.tv_usec*.000001;
 }
-static int run;
+//static int run;
 static double endtime;
 
 void startTimer(double dur){
@@ -88,7 +88,9 @@ void removeOrder(int index)
   for (int i=index+1;i<sizeof(queue);i++){
     queue[i-1].order.dir=queue[i].order.dir;
     queue[i-1].order.floor=queue[i].order.floor;
-    queue[i-1].etasjestopp=queue[i].etasjestopp;
+    for (int j=0;j<4;j++){
+      queue[i-1].etasjestopp[j]=queue[i].etasjestopp[j];
+    }
     queue[i-1].valid=queue[i].valid;
     j=i;
   }
@@ -98,7 +100,7 @@ void removeOrder(int index)
 
 void executeOrder()
 {
-  if(queue[0].etasjestopp[currentFloor-1]){ //endre order_dir_t til elev_motor_direction_t
+  if(queue[0].etasjestopp[currentFloor-1]==1){ //endre order_dir_t til elev_motor_direction_t
     elev_set_motor_direction(queue[0].order.dir);
   }
   else{
@@ -184,7 +186,7 @@ void optimizeQueue()
   }
 }
 
-void emergencyStop(){
+/*void emergencyStop(){
   elev_motor_direction_t prevDir=io_read_bit(MOTORDIR);
   elev_set_stop_lamp(); //fjern stopplys
   elev_set_motor_direction(0);
@@ -200,4 +202,4 @@ void emergencyStop(){
   if(elev_get_floor_sensor_signal()>-1){
     elev_set_door_open_lamp();
   }
-}
+}*/

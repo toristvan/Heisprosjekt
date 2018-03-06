@@ -119,7 +119,7 @@ void stopElev()
   if(queue[0].etasjestopp[currentFloor-1]){
     elev_set_motor_direction(0);
     elev_set_door_open_lamp(1);
-    startTimer();
+    startTimer(3);
     queue[0].etasjestopp[currentFloor-1]=0;
     if(queue[0].order.dir==-1){
       elev_set_button_lamp(BUTTON_CALL_DOWN,currentFloor-1,0);

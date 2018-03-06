@@ -135,6 +135,9 @@ void newOrder()
   struct order_type new_order;
   for (int floor=0;floor<4;floor++){
     for (elev_button_type_t button=BUTTON_CALL_UP;button<=BUTTON_COMMAND;button++){
+      if((button==BUTTON_CALL_DOWN && floor==0)||(button==BUTTON_CALL_UP && floor==#))){
+        continue;
+      }
       if(elev_get_button_signal(button,floor)){
         elev_set_button_lamp(button,floor,1);
         new_order.floor=floor+1;

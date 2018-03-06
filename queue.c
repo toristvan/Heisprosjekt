@@ -3,20 +3,20 @@
 
 void queueInit()
 {
-  for(int i=0;i<queue.length();i++){
+  for(int i=0;i<sizeof(queue);i++){
   queue[i].order.dir=0; queue[i].order.floor=0;queue[i].valid=0;queue[i].etasjestopp=[0,0,0,0];
   }
 }
-void addExternalOrder(order_type neworder)
+void addExternalOrder(struct order_type neworder)
 {
-  for (int i=0;i<queue.length();i++){
+  for (int i=0;i<sizeof(queue);i++){
     if (!queue[i].valid){
       queue[i].order=neworder;
       queue[i].etasjestopp[neworder.floor-1]=1;
-      queue[i].vaalid=1;
+      queue[i].valid=1;
       return;
     }
-    if(neworder==queue[i].order){
+    if(neworder.dir==queue[i].order.dir && neworder.floor==queue[i].order.floor){
       return;
     }
     if (neworder.dir==queue[i].order.dir){
@@ -30,9 +30,9 @@ void addExternalOrder(order_type neworder)
         }
     }
 }
+}
 
-void addInternalOrder(int floor)
-{
+void addInternalOrder(int floor) {
   if (queue[0].dir==DOWN && floor>=currentFloor) {//assert
     return;
   }
@@ -44,12 +44,12 @@ void addInternalOrder(int floor)
 
 int orderFinished()
 {
-  return (queue[0].etasjestopp==[0,0,0,0]);
+  return (queue[0].etasjestopp[0]==0 && queue[0].etasjestopp[1]==0 && queue[0].etasjestopp[2]==0 && queue[0].etasjestopp[3]==0);
 }
 
 void removeOrder(int index)
 {
-  for (int i=index+1;i<queue.length();i++){
+  for (int i=index+1;i<sizeof(queue);i++){
     queue[i-1]=queue[i];
   }
   queue[i].order.dir=NONE; queue[i].order.floor=0;queue[i].valid=0;
@@ -78,7 +78,7 @@ void executeOrder()
 }
 
 void stopElev()
-(
+{
   if(queue[0].etasjestopp[currentFloor-1]){
     elev_set_motor_direction(0);
     elev_set_door_open_lamp(1);
@@ -92,7 +92,7 @@ void stopElev()
     }
     elev_set_button_lamp(BUTTON_COMMAND,currentFloor-1,0);
   }
-)
+}
 void newOrder()
 {    //tar utgangspunkt i at kun én knapp trykkes inn om gangen.
   struct order_type new_order;
@@ -121,8 +121,9 @@ void newOrder()
 
 void optimizeQueue()
 { //legg bare til i queue[0]
-  for (int i=1;i<queue.length();i++){
+  for (int i=1;i<sizeof(queue);i++){
     if(queue[0]==queue[i]){
+      break;
     }
     if (queue[0].order.dir==queue[i].order.dir){
       if (queue[i].order.dir==UP && queue[i].order.floor<=queue[0].order.floor &&currentFloor<queue[i].floor){

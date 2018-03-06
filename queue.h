@@ -1,7 +1,7 @@
 #include "elev.h"
 #include <stdio.h>
 #include <sys/time.h>
-double get_time(void)
+double get_time(void);
 
 
 int currentFloor;
@@ -25,7 +25,7 @@ struct order_type{ //typedef struct
  struct internal_order queue[10];
 
  void queueInit();
- void addExternalOrder(order_type neworder);
+ void addExternalOrder(struct order_type neworder);
  void addInternalOrder(int floor);
  int orderFinished();
  void removeOrder(int index);

@@ -85,6 +85,31 @@ int orderFinished()
 void removeOrder(int index)
 {
   int j=0;
+  int teller=1;
+  if(!queue[1].valid){
+    printf("ja");
+    queue[j].order.dir=0; queue[j].order.floor=0;queue[j].valid=0;memset(queue[j].etasjestopp,0,sizeof(queue[j].etasjestopp));
+  }else{
+  while(queue[teller].valid){
+    teller++;
+    queue[teller-1].order.dir=queue[teller].order.dir;
+    queue[teller-1].order.floor=queue[teller].order.floor;
+    for (int k=0;k<4;j++){
+      queue[teller-1].etasjestopp[k]=queue[teller].etasjestopp[k];
+    }
+    queue[teller-1].valid=queue[teller].valid;
+    j=teller;
+  }
+  queue[j].order.dir=0; queue[j].order.floor=0;queue[j].valid=0;memset(queue[j].etasjestopp,0,sizeof(queue[j].etasjestopp));
+}
+}
+
+
+
+
+
+/*
+
   for (int i=index+1;i<sizeof(queue);i++){
     queue[i-1].order.dir=queue[i].order.dir;
     queue[i-1].order.floor=queue[i].order.floor;
@@ -94,9 +119,10 @@ void removeOrder(int index)
     queue[i-1].valid=queue[i].valid;
     j=i;
   }
+  }
   queue[j].order.dir=0; queue[j].order.floor=0;queue[j].valid=0;memset(queue[j].etasjestopp,0,sizeof(queue[j].etasjestopp));
 }
-
+*/
 
 void executeOrder()
 {

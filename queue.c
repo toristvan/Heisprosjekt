@@ -67,14 +67,16 @@ void addExternalOrder(struct order_type neworder)
 }
 }
 
-void addInternalOrder(int floor) {
-  if (queue[0].order.dir==DOWN && floor>=currentFloor) {//assert
+
+void addInternalOrder(int floor) { // fiks dette
+  if (io_read_bit(MOTORDIR)==1 && floor>=currentFloor) {//assert
     return;
   }
-  if (queue[0].order.dir==UP && floor<=currentFloor){
+  else if (io_read_bit(MOTORDIR)==0 && floor<=currentFloor){
     return;
-  }
+  }else{
   queue[0].etasjestopp[floor-1]=1;
+}
 }
 
 int orderFinished()
@@ -91,14 +93,14 @@ void removeOrder(int index)
     queue[j].order.dir=0; queue[j].order.floor=0;queue[j].valid=0;memset(queue[j].etasjestopp,0,sizeof(queue[j].etasjestopp));
   }else{
   while(queue[teller].valid){
-    teller++;
     queue[teller-1].order.dir=queue[teller].order.dir;
     queue[teller-1].order.floor=queue[teller].order.floor;
-    for (int k=0;k<4;j++){
+    for (int k=0;k<4;k++){
       queue[teller-1].etasjestopp[k]=queue[teller].etasjestopp[k];
     }
     queue[teller-1].valid=queue[teller].valid;
     j=teller;
+		teller++;
   }
   queue[j].order.dir=0; queue[j].order.floor=0;queue[j].valid=0;memset(queue[j].etasjestopp,0,sizeof(queue[j].etasjestopp));
 }
@@ -152,10 +154,10 @@ void stopElev()
     elev_set_door_open_lamp(1);
     startTimer(3);
     queue[0].etasjestopp[currentFloor-1]=0;
-    if(queue[0].order.dir==-1){
+    if((queue[0].order.dir==-1)&&(currentFloor>1)){ //evt !=1 for debugging
       elev_set_button_lamp(BUTTON_CALL_DOWN,currentFloor-1,0);
     }
-    else if(queue[0].order.dir==1){
+    else if((queue[0].order.dir==1)&&(currentFloor<4)){
       elev_set_button_lamp(BUTTON_CALL_UP,currentFloor-1,0);
     }
     elev_set_button_lamp(BUTTON_COMMAND,currentFloor-1,0);
@@ -169,8 +171,12 @@ void newOrder()
       if((button==BUTTON_CALL_DOWN&&floor==0)||(button==BUTTON_CALL_UP&&floor==3)){
         continue;
       }
+			if(floor==currentFloor-1){
+				continue;
+			}
       if(elev_get_button_signal(button,floor)){
-        elev_set_button_lamp(button,floor,1);
+				printf("floor: %d\n",floor);
+        elev_set_button_lamp(button,floor,1); //assert-fail, hvorfor får vi denne?
         new_order.floor=floor+1;
         if(button==0){
           new_order.dir=UP;
@@ -181,7 +187,7 @@ void newOrder()
           addExternalOrder(new_order);
         }else{
           new_order.dir=NONE;
-          addInternalOrder(floor);
+          addInternalOrder(new_order.floor);
         }
       }
     }

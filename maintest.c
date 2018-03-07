@@ -14,34 +14,40 @@ int main() {
 
     elev_set_motor_direction(DIRN_STOP);
     currentFloor=1;
+    int temp;
     while (1) {
+      temp=elev_get_floor_sensor_signal();
+      if(temp>-1){
+          //printf("ja                 ");
+          currentFloor =  temp+1; //elev_set_floor_indicator()
+          }
+
       newOrder();
       if (elev_get_stop_signal()) {
             elev_set_motor_direction(DIRN_STOP);
             break;
           }
 
-      if(elev_get_floor_sensor_signal()>-1){
-          //printf("ja                 ");
-          currentFloor =  elev_get_floor_sensor_signal()+1; //elev_set_floor_indicator()
-          }
       if(checkTimerFinished()){
           elev_set_door_open_lamp(0);
           executeOrder();
           }
+          //denne funker ikke
+      if(queue[0].etasjestopp[currentFloor-1] || (io_read_bit(MOTOR)==0 && elev_get_obstruction_signal())){
+          printf("currentFloor: %d\n", currentFloor);
+          stopElev();
+          }
       //stopElev();
-      if(orderFinished() && queue[0].valid){//endret her 
+      if(orderFinished() && queue[0].valid && checkTimerFinished()){//endret her
           //printf("order finsihed");
           removeOrder(0);
           //elev_set_motor_direction(queue[0].order.dir);
           }
-    if(queue[0].etasjestopp[currentFloor-1] || (MOTORDIR == DIRN_STOP && elev_get_obstruction_signal())){
-           printf("currentFloor: %d\n", currentFloor);
-     stopElev();
-            }
 
+          printf("MOTORDIR %d\n", io_read_bit(MOTORDIR));
       }
-      printf("sizeof(queue): %d\n", sizeof(queue));
+      //print valid
+      printf("valid %d\n", queue[0].valid);
       printf("currentFloor: %d\n", currentFloor);
       printf("etasjestopp[0]: %d\n", queue[0].etasjestopp[0]);
       printf("etasjestopp[1]: %d\n", queue[0].etasjestopp[1]);

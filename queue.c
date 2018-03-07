@@ -75,7 +75,11 @@ void addInternalOrder(int floor) { // fiks dette
   else if (io_read_bit(MOTORDIR)==0 && floor<=currentFloor){
     return;
   }else{
-  queue[0].etasjestopp[floor-1]=1;
+		if(queue[0].valid){
+  		queue[0].etasjestopp[floor-1]=1;
+		}else{
+			queue[0].etasjestopp[floor-1]=1;
+		}
 }
 }
 

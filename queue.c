@@ -68,19 +68,24 @@ void addExternalOrder(struct order_type neworder)
 }
 
 
-void addInternalOrder(int floor) { // fiks dette
+void addInternalOrder(int floor) { // fiks dette, vil nå ikke lage ny ordre over, hvis retning ned. Sjekk heis kjører.
   if (io_read_bit(MOTORDIR)==1 && floor>=currentFloor) {//assert
     return;
   }
   else if (io_read_bit(MOTORDIR)==0 && floor<=currentFloor){
     return;
   }else{
-		if(queue[0].valid){
   		queue[0].etasjestopp[floor-1]=1;
-		}else{
-			queue[0].etasjestopp[floor-1]=1;
+			if(!queue[0].valid){
+				queue[0].valid=1;
+				queue[0].order.floor=floor;
+				if(floor>currentFloor){
+					queue[0].order.dir=UP;
+				}else if(floor<currentFloor){
+					queue[0].order.dir=DOWN;
+				}
+			}
 		}
-}
 }
 
 int orderFinished()

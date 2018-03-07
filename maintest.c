@@ -11,7 +11,9 @@ int main() {
     }
 
     printf("Press STOP button to stop elevator and exit program.\n");
-
+    while(elev_get_floor_sensor_signal()!=0){ //initialiserer
+      elev_set_motor_direction(DIRN_DOWN);
+    }
     elev_set_motor_direction(DIRN_STOP);
     currentFloor=1;
     int temp;
@@ -19,12 +21,25 @@ int main() {
       temp=elev_get_floor_sensor_signal();
       if(temp>-1){
           //printf("ja                 ");
-          currentFloor =  temp+1; //elev_set_floor_indicator()
+          currentFloor =  temp+1;
+          elev_set_floor_indicator(currentFloor);
           }
 
       newOrder();
-      if (elev_get_stop_signal()) {
+      if (elev_get_stop_signal()) { //endra
+            elev_set_stop_lamp(1);
             elev_set_motor_direction(DIRN_STOP);
+            elev_init();
+            queueInit(); //tror dette funker
+            if(elev_get_floor_sensor_signal()!=-1){
+              elev_set_door_open_lamp(1);
+            }
+            while(elev_get_stop_signal()){
+              //stanser alt av dynamikk mens knapp holdes inne
+            }
+            elev_set_door_open_lamp(0);
+            elev_set_stop_lamp(0);
+
             break;
           }
 

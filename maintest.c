@@ -16,21 +16,29 @@ int main() {
     }
     elev_set_motor_direction(DIRN_STOP);
     currentFloor=1;
+    int prevdir=0;
     int temp;
     while (1) {
       temp=elev_get_floor_sensor_signal();
       if(temp>-1){
           //printf("ja                 ");
           currentFloor =  temp+1;
-          elev_set_floor_indicator(currentFloor);
+          elev_set_floor_indicator(currentFloor-1);
           }
 
       newOrder();
       if (elev_get_stop_signal()) { //endra
             elev_set_stop_lamp(1);
+            if(temp>-1){
+            	if(queue[0].order.dir==UP){
+            		prevdir=1;
+            	}else{
+            		prevdir=-1;
+            	}
+            }
             elev_set_motor_direction(DIRN_STOP);
             elev_init();
-            queueInit(); //tror dette funker
+            queueInit(); //denne funker ikke!!!//Fiksa 08.03
             if(elev_get_floor_sensor_signal()!=-1){
               elev_set_door_open_lamp(1);
             }
@@ -39,8 +47,8 @@ int main() {
             }
             elev_set_door_open_lamp(0);
             elev_set_stop_lamp(0);
+            //printf("-------------- \n");
 
-            break;
           }
 
       if(checkTimerFinished()){
@@ -49,7 +57,7 @@ int main() {
           }
           //denne funker ikke
       if(queue[0].etasjestopp[currentFloor-1] || (io_read_bit(MOTOR)==0 && elev_get_obstruction_signal())){
-          printf("currentFloor: %d\n", currentFloor);
+          //printf("currentFloor: %d\n", currentFloor);
           stopElev();
           }
       //stopElev();
@@ -59,7 +67,7 @@ int main() {
           //elev_set_motor_direction(queue[0].order.dir);
           }
 
-          printf("MOTORDIR %d\n", io_read_bit(MOTORDIR));
+          //printf("MOTORDIR %d\n", io_read_bit(MOTORDIR));
       }
       //print valid
       printf("valid %d\n", queue[0].valid);
@@ -78,3 +86,14 @@ int main() {
 
     return 0;
 }
+
+
+/*
+Dette må fikses(08.03):
+1. Intern bestillingsknapp når det ikke er lagt inn eksterne ordre
+2. NED fra fjerde, Heis går opp, Trykker opp fra første, Trykker ned fra andre,
+- Stopper ikke i andre på vei ned. Dette er kind off meningen, men ikke ideellt
+3. Emergency stop. Dersom heis stopper mellom etasjer klarer den ikke gå
+til den etasjen den var i sist. Må bruke en temp-variabel for å fortelle om vi er på oversiden eller undersiden.
+4. Se på globale variabler
+/*

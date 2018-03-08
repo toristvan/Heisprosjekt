@@ -38,12 +38,15 @@ int queueEqual(struct internal_order q1,struct internal_order q2){
 
 void queueInit()
 {
-  for(int i=0;i<sizeof(queue);i++){
+  int i=0;
+  while(queue[i].valid){
   queue[i].order.dir=0; queue[i].order.floor=0;queue[i].valid=0;memset(queue[i].etasjestopp,0,sizeof(queue[i].etasjestopp));
+  i++;
   }
 }
 void addExternalOrder(struct order_type neworder)
 {
+  //printf("addexternal \n");
   for (int i=0;i<sizeof(queue);i++){
     if (!queue[i].valid){
       queue[i].order=neworder;
@@ -184,7 +187,7 @@ void newOrder()
 				continue;
 			}
       if(elev_get_button_signal(button,floor)){
-				printf("floor: %d\n",floor);
+				// printf("floor: %d\n",floor);
         elev_set_button_lamp(button,floor,1); //assert-fail, hvorfor får vi denne?
         new_order.floor=floor+1;
         if(button==0){

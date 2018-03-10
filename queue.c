@@ -6,8 +6,7 @@ double get_time(void){
 	gettimeofday(&time, NULL);
 	return (double)time.tv_sec + (double)time.tv_usec*.000001;
 }
-//static int run;
-static double endtime;
+
 
 void startTimer(double dur){
 	endtime=get_time()+dur;
@@ -330,23 +329,29 @@ void optimizeQueue()
   }
 }
 
-/*void emergencyStop(){
-  elev_motor_direction_t prevDir=io_read_bit(MOTORDIR);
-  elev_set_stop_lamp(); //fjern stopplys
-  elev_set_motor_direction(0);
-  queueInit();
-  for (int floor=0;floor<4;floor++){
-    for (elev_button_type_t button=BUTTON_CALL_UP; button<=BUTTON_COMMAND;button++){
-      if((button==BUTTON_CALL_DOWN && floor==0)||(button==BUTTON_CALL_UP && floor==3)){
-        continue;
-      }
-      elev_set_button_lamp(button, floor, 0);
-    }
+void emergencyStop(){
+printf("--EMERGENCY STOP--\n");
+elev_set_stop_lamp(1);
+if(elev_get_floor_sensor_signal()==-1){ 
+  if(io_read_bit(MOTORDIR)==0){
+    prevdir=1;
+  }else{
+    prevdir=-1;
   }
-  if(elev_get_floor_sensor_signal()>-1){
-    elev_set_door_open_lamp();
-  }
-}*/
+}
+elev_set_motor_direction(DIRN_STOP);
+elev_init();
+queueInit(); 
+if(elev_get_floor_sensor_signal()!=-1){
+  elev_set_door_open_lamp(1);
+}
+while(elev_get_stop_signal()){
+//stanser alt av dynamikk mens knapp holdes inne
+}
+elev_set_door_open_lamp(0);
+elev_set_stop_lamp(0);
+elev_set_floor_indicator(currentFloor-1);
+}
 
 
 void print_Orders(){

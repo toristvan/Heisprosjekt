@@ -72,10 +72,10 @@ void addExternalOrder(struct order_type neworder)
 
 
 void addInternalOrder(int floor) { // fiks dette, vil nå ikke lage ny ordre over, hvis retning ned. Sjekk heis kjører.
-  if (io_read_bit(MOTORDIR)==1 && floor>=currentFloor) {//assert
+  if ((io_read_bit(MOTORDIR)==1 && floor>=currentFloor)&&(queue[0].valid)) {//assert
     return;
   }
-  else if (io_read_bit(MOTORDIR)==0 && floor<=currentFloor){
+  else if ((io_read_bit(MOTORDIR)==0 && floor<=currentFloor)&&(queue[0].valid)){
     return;
   }else{
   		queue[0].etasjestopp[floor-1]=1;
@@ -139,42 +139,40 @@ void removeOrder(int index)
 */
 
 void executeOrder()
-{
-	//Spesialtilfelle(Når heisen stoppes mellom etasjer)
+{ 
+  //Spesialtilfelle(Når heisen stoppes mellom etasjer)
   if (prevdir!=0)
   {
     for (int i = 0; i <4; ++i)
     {
       if (queue[0].etasjestopp[i])
       {
-        if ((currentFloor==1) || (prevdir==-1 && currentFloor==2))//Mellom 1. og 2. etasje
+        if (((currentFloor==1) || (prevdir==-1 && currentFloor==2))&&(i>0))//Mellom 1. og 2. etasje
         {
-          if (i>0){
           elev_set_motor_direction(1);
+          printf("Case1; \n");
           return;
         }
-        }
-        else if ((prevdir=1 && currentFloor==2) || (prevdir==-1 && currentFloor==3))//Mellom 2. og 3. etasje
+        else if (((prevdir==1 && currentFloor==2) || (prevdir==-1 && currentFloor==3))&&(i>1))//Mellom 2. og 3. etasje
         {
-         if (i>1){
           elev_set_motor_direction(1);
-          return;
-        } 
-        }
-        else if ((currentFloor==4) || (prevdir==1 && currentFloor==3))//Mellom 3. og 4. etasje
-        {
-          if (i>2){
-          elev_set_motor_direction(1);
+          printf("Case2; \n");
           return;
         }
+        else if (((currentFloor==4) || (prevdir==1 && currentFloor==3))&&(i>2))//Mellom 3. og 4. etasje
+        {
+          elev_set_motor_direction(1);
+          printf("Case3; \n");
+          return;
         }else
         {
         elev_set_motor_direction(-1);
+        printf("Case4; \n");
           return;
         }
       }
     }
-  }
+}
   if(queue[0].etasjestopp[currentFloor-1]==1){ //endre order_dir_t til elev_motor_direction_t
     elev_set_motor_direction(queue[0].order.dir);
   }
@@ -201,10 +199,10 @@ void stopElev()
     elev_set_door_open_lamp(1);
     startTimer(3);
     queue[0].etasjestopp[currentFloor-1]=0;
-    if((queue[0].order.dir==-1)&&(currentFloor>1)){ //evt !=1 for debugging
+    if((queue[0].order.dir==-1&&(currentFloor)>1)){ //evt !=1 for debugging 
       elev_set_button_lamp(BUTTON_CALL_DOWN,currentFloor-1,0);
     }
-    else if((queue[0].order.dir==1)&&(currentFloor<4)){
+    else if((queue[0].order.dir==1)&&(currentFloor<4)){    
       elev_set_button_lamp(BUTTON_CALL_UP,currentFloor-1,0);
     }
     elev_set_button_lamp(BUTTON_COMMAND,currentFloor-1,0);
@@ -218,9 +216,6 @@ void newOrder()
       if((button==BUTTON_CALL_DOWN&&floor==0)||(button==BUTTON_CALL_UP&&floor==3)){
         continue;
       }
-			if(floor==currentFloor-1){
-				continue;
-			}
       if(elev_get_button_signal(button,floor)){
 				// printf("floor: %d\n",floor);
         elev_set_button_lamp(button,floor,1); //assert-fail, hvorfor får vi denne?

@@ -16,59 +16,73 @@ int main() {
     }
     elev_set_motor_direction(DIRN_STOP);
     currentFloor=1;
-    int prevdir=0;
+    prevdir=0;
     int temp;
     while (1) {
+        //printf("prevdir: %d ", prevdir);
       temp=elev_get_floor_sensor_signal();
+      //printf("temp: %d ",temp);
       if(temp>-1){
-          //printf("ja                 ");
-          currentFloor =  temp+1;
-          elev_set_floor_indicator(currentFloor-1);
-          }
+        printf("inne i temp \n");
+        prevdir=0;
+        currentFloor =  temp+1;
+        elev_set_floor_indicator(currentFloor-1);
+        }
 
-      newOrder();
-      if (elev_get_stop_signal()) { //endra
+
+
+        newOrder();
+        if (elev_get_stop_signal()) { //endra
+            printf("----------\n");
             elev_set_stop_lamp(1);
-            if(temp>-1){
-            	if(queue[0].order.dir==UP){
-            		prevdir=1;
-            	}else{
-            		prevdir=-1;
-            	}
+            if(elev_get_floor_sensor_signal()==-1){ // setter tilstand(3 tilstander)
+                printf(" i if1 \n");
+                printf(" MOTORDIR: %d\n", io_read_bit(MOTORDIR));
+                if(io_read_bit(MOTORDIR)==0){
+                    printf(" i if2 \n");
+                    prevdir=1;
+                }else{
+                    printf(" i else2 \n");
+                    prevdir=-1;
+                }
             }
+            printf(" forbi if\n");
+            printf("prevdir: %d \n", prevdir);
             elev_set_motor_direction(DIRN_STOP);
             elev_init();
             queueInit(); //denne funker ikke!!!//Fiksa 08.03
             if(elev_get_floor_sensor_signal()!=-1){
-              elev_set_door_open_lamp(1);
+            elev_set_door_open_lamp(1);
             }
             while(elev_get_stop_signal()){
-              //stanser alt av dynamikk mens knapp holdes inne
+            //stanser alt av dynamikk mens knapp holdes inne
             }
             elev_set_door_open_lamp(0);
             elev_set_stop_lamp(0);
             //printf("-------------- \n");
+            printf("prevdir2: %d \n", prevdir);
 
+        }
+
+        if(checkTimerFinished()){
+            elev_set_door_open_lamp(0);
+            executeOrder();
+        }
+           //denne funker ikke
+        if((queue[0].etasjestopp[currentFloor-1])&&(prevdir==0)){   // || (elev_get_obstruction_signal())
+            //printf("currentFloor: %d\n", currentFloor);
+            printf("prevdir i stopp: %d \n", prevdir);
+            stopElev();
+        }
+        
+        if(orderFinished() && queue[0].valid && checkTimerFinished()){//endret her
+            //printf("order finsihed");
+            removeOrder(0);
+            //elev_set_motor_direction(queue[0].order.dir);
           }
 
-      if(checkTimerFinished()){
-          elev_set_door_open_lamp(0);
-          executeOrder();
-          }
-          //denne funker ikke
-      if(queue[0].etasjestopp[currentFloor-1] || (io_read_bit(MOTOR)==0 && elev_get_obstruction_signal())){
-          //printf("currentFloor: %d\n", currentFloor);
-          stopElev();
-          }
-      //stopElev();
-      if(orderFinished() && queue[0].valid && checkTimerFinished()){//endret her
-          //printf("order finsihed");
-          removeOrder(0);
-          //elev_set_motor_direction(queue[0].order.dir);
-          }
-
-          //printf("MOTORDIR %d\n", io_read_bit(MOTORDIR));
-      }
+            //printf("MOTORDIR %d\n", io_read_bit(MOTORDIR));
+    }
       //print valid
       printf("valid %d\n", queue[0].valid);
       printf("currentFloor: %d\n", currentFloor);
@@ -96,4 +110,4 @@ Dette må fikses(08.03):
 3. Emergency stop. Dersom heis stopper mellom etasjer klarer den ikke gå
 til den etasjen den var i sist. Må bruke en temp-variabel for å fortelle om vi er på oversiden eller undersiden.
 4. Se på globale variabler
-/*
+*/

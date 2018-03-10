@@ -9,6 +9,7 @@
 double get_time(void);
 
 int currentFloor;
+int prevdir;
 typedef enum tag_order_dir{
   DOWN=-1,
   NONE=0,

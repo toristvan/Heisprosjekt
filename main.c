@@ -5,33 +5,34 @@
 
 int main() {
     // Initialize hardware
-    if (!elev_init()) { //skrur av alle lysene
+    //Skrur av alle lysene
+    if (!elev_init()) { 
         printf("Unable to initialize elevator hardware!\n");
         return 1;
     }
 
     printf("Press STOP button to stop elevator and exit program.\n");
-    while(elev_get_floor_sensor_signal()!=0){ //initialiserer
+    while(elev_get_floor_sensor_signal()!=0){ 
       elev_set_motor_direction(DIRN_DOWN);
     }
     elev_set_motor_direction(DIRN_STOP);
     currentFloor=1;
     prevdir=0;
-    int temp;
     while (1) {
         //printf("prevdir: %d ", prevdir);
-      temp=elev_get_floor_sensor_signal();
+      floorValid=elev_get_floor_sensor_signal();
       //printf("temp: %d ",temp);
-      if(temp>-1){
+      if(floorValid>-1){
         //printf("inne i temp \n");
         prevdir=0;
-        currentFloor =  temp+1;
+        currentFloor =  floorValid+1;
         elev_set_floor_indicator(currentFloor-1);
         }
 
 
         //printf("startneworder\n");
         newOrder();
+        optimizeQueue();
         //printf("endneworder\n");
         if (elev_get_stop_signal()) { //endra
             printf("----------\n");
@@ -87,10 +88,11 @@ int main() {
             //printf("removeOrder");
             //print_Orders();
             removeOrder(0);
+            optimizeQueue();
             printf("Etter remove: \n");
             print_Orders();
             //printf("startOptimizequeue: \n");
-            optimizeQueue();
+            
             //printf("endOptimizequeue: \n");
             //elev_set_motor_direction(queue[0].order.dir);
           }

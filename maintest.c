@@ -17,21 +17,21 @@ int main() {
     elev_set_motor_direction(DIRN_STOP);
     currentFloor=1;
     prevdir=0;
-    int temp;
     while (1) {
         //printf("prevdir: %d ", prevdir);
-      temp=elev_get_floor_sensor_signal();
+      floorValid=elev_get_floor_sensor_signal();
       //printf("temp: %d ",temp);
-      if(temp>-1){
+      if(floorValid>-1){
         //printf("inne i temp \n");
         prevdir=0;
-        currentFloor =  temp+1;
+        currentFloor =  floorValid+1;
         elev_set_floor_indicator(currentFloor-1);
         }
 
 
         //printf("startneworder\n");
         newOrder();
+        optimizeQueue();
         //printf("endneworder\n");
         if (elev_get_stop_signal()) { //endra
             printf("----------\n");
@@ -76,13 +76,6 @@ int main() {
             //printf("prevdir i stopp: %d \n", prevdir);
             printf("-----------\n");
             print_Orders();
-            //endrer retning for å kunne legge til fremtidige ordre, samt lys fungerer
-            if(queue[0].order.floor==4&&currentFloor==4&&queue.order.dir==UP){
-              queue[0].order.dir=DOWN;
-            }
-            else if(queue[0].order.floor==1&&currentFloor==1&&queue.order.dir==DOWN){
-              queue[0].order.dir=UP;
-            }
             stopElev();
             optimizeQueue();
             //printf("stopElevEnd\n");
@@ -94,10 +87,11 @@ int main() {
             //printf("removeOrder");
             //print_Orders();
             removeOrder(0);
+            optimizeQueue();
             printf("Etter remove: \n");
             print_Orders();
             //printf("startOptimizequeue: \n");
-            optimizeQueue();
+            
             //printf("endOptimizequeue: \n");
             //elev_set_motor_direction(queue[0].order.dir);
           }

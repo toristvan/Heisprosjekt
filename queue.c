@@ -73,7 +73,10 @@ void addExternalOrder(struct order_type neworder)
 
 
 void addInternalOrder(int floor) { // fiks dette, vil nå ikke lage ny ordre over, hvis retning ned. Sjekk heis kjører.
-
+  if((floor==currentFloor)&&(floorValid>-1)){
+    stopElev();
+    return;
+  }
   if ((io_read_bit(MOTORDIR)==1 && floor>=currentFloor)&&(queue[0].valid)) {//assert
     int ind=0;
     int temp_valid=1;
@@ -245,7 +248,7 @@ void executeOrder()
 
 void stopElev()
 {
-  if(queue[0].etasjestopp[currentFloor-1]){
+  //if(queue[0].etasjestopp[currentFloor-1]){
     elev_set_motor_direction(0);
     elev_set_door_open_lamp(1);
     startTimer(3);
@@ -257,7 +260,6 @@ void stopElev()
       elev_set_button_lamp(BUTTON_CALL_UP,currentFloor-1,0);
     }
     elev_set_button_lamp(BUTTON_COMMAND,currentFloor-1,0);
-  }
 }
 void newOrder()
 {    //tar utgangspunkt i at kun én knapp trykkes inn om gangen.

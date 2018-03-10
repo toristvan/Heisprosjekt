@@ -73,36 +73,50 @@ void addExternalOrder(struct order_type neworder)
 
 void addInternalOrder(int floor) { // fiks dette, vil nå ikke lage ny ordre over, hvis retning ned. Sjekk heis kjører.
   if ((io_read_bit(MOTORDIR)==1 && floor>=currentFloor)&&(queue[0].valid)) {//assert
-    int index=0;
-    while((index<9)&&(!queue[index].valid)){
-      index++;
-      if(!queue[index].valid){
-        queue[index].valid=1;
-        queue[index].etasjestopp[floor-1]=1;
-        queue[index].order.floor=floor;
-        queue[index].order.dir=NONE;
-        printf("index: %d\n", index);
-        break;
+    int ind=0;
+    int temp_valid=1;
+    while((ind<9)&&(temp_valid==1)){
+      ind++;
+      printf("que[ind].valid: %d\n", queue[ind].valid);
+      if(queue[ind].valid==0){
+          if (queue[ind-1].order.floor==floor)
+          {
+            temp_valid=0;
+          }else{
+          queue[ind].valid=1;
+          queue[ind].etasjestopp[floor-1]=1;
+          queue[ind].order.floor=floor;
+          queue[ind].order.dir=NONE;
+          printf("if_index: %d\n", ind);
+          temp_valid=0;
+        }
       }
 
-      printf("index: %d\n", index);
+      printf("while_index: %d\n", ind);
 
     }
     return;
   }
   else if ((io_read_bit(MOTORDIR)==0 && floor<=currentFloor)&&(queue[0].valid)){
-    int index=1;
-    while((index<10)){
-      if(!queue[index].valid){
-        queue[index].valid=1;
-        queue[index].etasjestopp[floor-1]=1;
-        queue[index].order.floor=floor;
-        queue[index].order.dir=NONE;
-        printf("index: %d\n", index);
-        break;
+    int ind=0;
+    int temp_valid=1;
+    while((ind<9)&&(temp_valid==1)){
+      ind++;
+      printf("que[ind].valid: %d\n", queue[ind].valid);
+      if(queue[ind].valid==0){
+          if (queue[ind-1].order.floor==floor)
+          {
+            temp_valid=0;
+          }else{
+          queue[ind].valid=1;
+          queue[ind].etasjestopp[floor-1]=1;
+          queue[ind].order.floor=floor;
+          queue[ind].order.dir=NONE;
+          printf("if2_index: %d\n", ind);
+          temp_valid=0;
       }
-      index++;
-      printf("index: %d\n", index);
+    }
+      printf("while2_index: %d\n", ind);
     }
     return;
   }else{

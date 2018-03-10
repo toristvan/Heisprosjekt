@@ -41,3 +41,4 @@ struct order_type{ //typedef struct
  void stopElev();
  void newOrder();
  void optimizeQueue();
+ void print_Orders();

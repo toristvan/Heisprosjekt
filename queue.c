@@ -47,7 +47,17 @@ void queueInit()
 void addExternalOrder(struct order_type neworder)
 {
   //printf("addexternal \n");
-  for (int i=0;i<10;i++){
+    if (neworder.dir==queue[0].order.dir){
+      if (neworder.dir==UP && neworder.floor<queue[0].order.floor &&currentFloor<neworder.floor){
+          queue[0].etasjestopp[neworder.floor-1]=1;
+          return;
+        }
+        else if (neworder.dir==DOWN && neworder.floor>queue[0].order.floor && currentFloor>neworder.floor){
+          queue[0].etasjestopp[neworder.floor-1]=1;
+          return;
+        }
+    }
+    for (int i=0;i<10;i++){
     if (!queue[i].valid){
       queue[i].order=neworder;
       queue[i].etasjestopp[neworder.floor-1]=1;
@@ -55,29 +65,20 @@ void addExternalOrder(struct order_type neworder)
       return;
     }
     if(neworder.dir==queue[i].order.dir && neworder.floor==queue[i].order.floor){ //orderEqual(neworder,queue[i])
+      queue[i].etasjestopp[neworder.floor-1]=1;
       return;
-    }
-    if (neworder.dir==queue[i].order.dir){
-      if (neworder.dir==UP && neworder.floor<=queue[i].order.floor &&currentFloor<neworder.floor){
-          queue[i].etasjestopp[neworder.floor-1]=1;
-          return;
-        }
-        else if (neworder.dir==DOWN && neworder.floor>=queue[i].order.floor && currentFloor>neworder.floor){
-          queue[i].etasjestopp[neworder.floor-1]=1;
-          return;
-        }
     }
 }
 }
 
 
 void addInternalOrder(int floor) { // fiks dette, vil nå ikke lage ny ordre over, hvis retning ned. Sjekk heis kjører.
-  if ((io_read_bit(MOTORDIR)==1 && floor>=currentFloor)&&(queue[0].valid)) {//assert
+  if ((io_read_bit(MOTORDIR)==1 && floor>currentFloor)&&(queue[0].valid)) {//assert
     int ind=0;
     int temp_valid=1;
     while((ind<9)&&(temp_valid==1)){
       ind++;
-      printf("que[ind].valid: %d\n", queue[ind].valid);
+      //printf("que[ind].valid: %d\n", queue[ind].valid);
       if(queue[ind].valid==0){
           if (queue[ind-1].order.floor==floor)
           {
@@ -87,22 +88,22 @@ void addInternalOrder(int floor) { // fiks dette, vil nå ikke lage ny ordre ove
           queue[ind].etasjestopp[floor-1]=1;
           queue[ind].order.floor=floor;
           queue[ind].order.dir=NONE;
-          printf("if_index: %d\n", ind);
+          //printf("if_index: %d\n", ind);
           temp_valid=0;
         }
       }
 
-      printf("while_index: %d\n", ind);
+      //printf("while_index: %d\n", ind);
 
     }
     return;
   }
-  else if ((io_read_bit(MOTORDIR)==0 && floor<=currentFloor)&&(queue[0].valid)){
+  else if ((io_read_bit(MOTORDIR)==0 && floor<currentFloor)&&(queue[0].valid)){
     int ind=0;
     int temp_valid=1;
     while((ind<9)&&(temp_valid==1)){
       ind++;
-      printf("que[ind].valid: %d\n", queue[ind].valid);
+      //printf("que[ind].valid: %d\n", queue[ind].valid);
       if(queue[ind].valid==0){
           if (queue[ind-1].order.floor==floor)
           {
@@ -112,15 +113,21 @@ void addInternalOrder(int floor) { // fiks dette, vil nå ikke lage ny ordre ove
           queue[ind].etasjestopp[floor-1]=1;
           queue[ind].order.floor=floor;
           queue[ind].order.dir=NONE;
-          printf("if2_index: %d\n", ind);
+          //printf("if2_index: %d\n", ind);
           temp_valid=0;
       }
     }
-      printf("while2_index: %d\n", ind);
+      //printf("while2_index: %d\n", ind);
     }
     return;
   }else{
   		queue[0].etasjestopp[floor-1]=1;
+      if((queue[0].order.dir==UP) && (floor>queue[0].order.floor)){
+        queue[0].order.floor=floor;
+      }
+      else if((queue[0].order.dir==DOWN) && (floor<queue[0].order.floor)){
+        queue[0].order.floor=floor;
+      }
 			if(!queue[0].valid){
 				queue[0].valid=1;
 				queue[0].order.floor=floor;
@@ -290,7 +297,7 @@ void optimizeQueue()
     else if(queue[0].order.floor==1){
       queue[0].order.dir=UP;
     }
-    else if(queue[0].order.floor>=currentFloor){
+    else if(queue[0].order.floor>currentFloor){ //hadde >=
       queue[0].order.dir=UP;
     }
     else if(queue[0].order.floor<currentFloor){
@@ -335,3 +342,26 @@ void optimizeQueue()
     elev_set_door_open_lamp();
   }
 }*/
+
+
+void print_Orders(){
+int i=0;
+printf("Orders:\n");
+while(queue[i].valid){
+  printf("Queue[i]: i=%d\n", i);
+  printf("valid: %d\n", queue[i].valid);
+  printf("Order_Floor: %d\n", queue[i].order.floor);
+  printf("Order.dir: %d\n", queue[i].order.dir);
+  printf("etasjestopp[0]: %d\n", queue[i].etasjestopp[0]);
+  printf("etasjestopp[1]: %d\n", queue[i].etasjestopp[1]);
+  printf("etasjestopp[2]: %d\n", queue[i].etasjestopp[2]);
+  printf("etasjestopp[3]: %d\n", queue[i].etasjestopp[3]);
+  printf("\n");
+  i++;
+}
+
+
+}
+
+
+

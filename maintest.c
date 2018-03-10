@@ -74,18 +74,23 @@ int main() {
         if((queue[0].etasjestopp[currentFloor-1])&&(prevdir==0)){   // || (elev_get_obstruction_signal())
             //printf("currentFloor: %d\n", currentFloor);
             //printf("prevdir i stopp: %d \n", prevdir);
-            printf("stopElevstart\n");
+            printf("-----------\n");
+            print_Orders();
             stopElev();
-            printf("stopElevEnd\n");
-            printf("etasjestopp[0] %d\n", queue[0].etasjestopp[0]);
+            optimizeQueue();
+            //printf("stopElevEnd\n");
+            //printf("etasjestopp[0] %d\n", queue[0].etasjestopp[0]);
         }
         
         if(orderFinished() && queue[0].valid && checkTimerFinished()){//endret her
             //printf("order finsihed");
-            printf("removeOrder");
+            //printf("removeOrder");
+            //print_Orders();
             removeOrder(0);
+            printf("Etter remove: \n");
+            print_Orders();
             //printf("startOptimizequeue: \n");
-            //optimizeQueue();
+            optimizeQueue();
             //printf("endOptimizequeue: \n");
             //elev_set_motor_direction(queue[0].order.dir);
           }

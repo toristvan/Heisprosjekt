@@ -47,7 +47,7 @@ void queueInit()
 void addExternalOrder(struct order_type neworder)
 {
   //printf("addexternal \n");
-  for (int i=0;i<sizeof(queue);i++){
+  for (int i=0;i<10;i++){
     if (!queue[i].valid){
       queue[i].order=neworder;
       queue[i].etasjestopp[neworder.floor-1]=1;
@@ -73,16 +73,50 @@ void addExternalOrder(struct order_type neworder)
 
 void addInternalOrder(int floor) { // fiks dette, vil nå ikke lage ny ordre over, hvis retning ned. Sjekk heis kjører.
   if ((io_read_bit(MOTORDIR)==1 && floor>=currentFloor)&&(queue[0].valid)) {//assert
+    int index=0;
+    while((index<9)&&(!queue[index].valid)){
+      index++;
+      if(!queue[index].valid){
+        queue[index].valid=1;
+        queue[index].etasjestopp[floor-1]=1;
+        queue[index].order.floor=floor;
+        queue[index].order.dir=NONE;
+        printf("index: %d\n", index);
+        break;
+      }
+
+      printf("index: %d\n", index);
+
+    }
     return;
   }
   else if ((io_read_bit(MOTORDIR)==0 && floor<=currentFloor)&&(queue[0].valid)){
+    int index=1;
+    while((index<10)){
+      if(!queue[index].valid){
+        queue[index].valid=1;
+        queue[index].etasjestopp[floor-1]=1;
+        queue[index].order.floor=floor;
+        queue[index].order.dir=NONE;
+        printf("index: %d\n", index);
+        break;
+      }
+      index++;
+      printf("index: %d\n", index);
+    }
     return;
   }else{
   		queue[0].etasjestopp[floor-1]=1;
 			if(!queue[0].valid){
 				queue[0].valid=1;
 				queue[0].order.floor=floor;
-				if(floor>currentFloor){
+        if(floor==4){
+          queue[0].order.dir=DOWN;
+        }
+        else if(floor==1){
+          queue[0].order.dir=UP;
+        }
+				else if(floor>=currentFloor){
 					queue[0].order.dir=UP;
 				}else if(floor<currentFloor){
 					queue[0].order.dir=DOWN;
@@ -98,12 +132,8 @@ int orderFinished()
 
 void removeOrder(int index)
 {
-  int j=0;
-  int teller=1;
-  if(!queue[1].valid){
-    printf("ja");
-    queue[j].order.dir=0; queue[j].order.floor=0;queue[j].valid=0;memset(queue[j].etasjestopp,0,sizeof(queue[j].etasjestopp));
-  }else{
+  int j=index;
+  int teller=j+1;
   while(queue[teller].valid){
     queue[teller-1].order.dir=queue[teller].order.dir;
     queue[teller-1].order.floor=queue[teller].order.floor;
@@ -115,7 +145,6 @@ void removeOrder(int index)
 		teller++;
   }
   queue[j].order.dir=0; queue[j].order.floor=0;queue[j].valid=0;memset(queue[j].etasjestopp,0,sizeof(queue[j].etasjestopp));
-}
 }
 
 
@@ -240,18 +269,33 @@ void newOrder()
 
 void optimizeQueue()
 { //legg bare til i queue[0]
-  for (int i=1;i<sizeof(queue);i++){
+  if(queue[0].order.dir==NONE){
+    if(queue[0].order.floor==4){
+      queue[0].order.dir=DOWN;
+    }
+    else if(queue[0].order.floor==1){
+      queue[0].order.dir=UP;
+    }
+    else if(queue[0].order.floor>=currentFloor){
+      queue[0].order.dir=UP;
+    }
+    else if(queue[0].order.floor<currentFloor){
+      queue[0].order.dir=DOWN;
+    }
+
+  }
+  for (int i=1;i<10;i++){
     if(queueEqual(queue[0],queue[i])){
       removeOrder(i);
       break;
     }
-    if (queue[0].order.dir==queue[i].order.dir){
-      if (queue[i].order.dir==UP && queue[i].order.floor<=queue[0].order.floor &&currentFloor<queue[i].order.floor){
+    if ((queue[0].order.dir==queue[i].order.dir)||(queue[i].order.dir==NONE)){
+      if (queue[0].order.dir==UP && queue[i].order.floor<=queue[0].order.floor && currentFloor<queue[i].order.floor){
           queue[0].etasjestopp[queue[i].order.floor-1]=1;
           removeOrder(i);
           break;
       }
-      else if (queue[i].order.dir==DOWN && queue[i].order.floor>=queue[0].order.floor && currentFloor>queue[i].order.floor){
+      else if (queue[0].order.dir==DOWN && queue[i].order.floor>=queue[0].order.floor && currentFloor>queue[i].order.floor){
           queue[0].etasjestopp[queue[i].order.floor-1]=1;
           removeOrder(i);
           break;

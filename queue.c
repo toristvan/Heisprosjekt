@@ -140,6 +140,41 @@ void removeOrder(int index)
 
 void executeOrder()
 {
+	//Spesialtilfelle(Når heisen stoppes mellom etasjer)
+  if (prevdir!=0)
+  {
+    for (int i = 0; i <4; ++i)
+    {
+      if (queue[0].etasjestopp[i])
+      {
+        if ((currentFloor==1) || (prevdir==-1 && currentFloor==2))//Mellom 1. og 2. etasje
+        {
+          if (i>0){
+          elev_set_motor_direction(1);
+          return;
+        }
+        }
+        else if ((prevdir=1 && currentFloor==2) || (prevdir==-1 && currentFloor==3))//Mellom 2. og 3. etasje
+        {
+         if (i>1){
+          elev_set_motor_direction(1);
+          return;
+        } 
+        }
+        else if ((currentFloor==4) || (prevdir==1 && currentFloor==3))//Mellom 3. og 4. etasje
+        {
+          if (i>2){
+          elev_set_motor_direction(1);
+          return;
+        }
+        }else
+        {
+        elev_set_motor_direction(-1);
+          return;
+        }
+      }
+    }
+  }
   if(queue[0].etasjestopp[currentFloor-1]==1){ //endre order_dir_t til elev_motor_direction_t
     elev_set_motor_direction(queue[0].order.dir);
   }

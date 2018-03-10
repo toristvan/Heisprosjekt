@@ -131,13 +131,13 @@ void addInternalOrder(int floor) { // fiks dette, vil nå ikke lage ny ordre ove
 			if(!queue[0].valid){
 				queue[0].valid=1;
 				queue[0].order.floor=floor;
-        if(floor==4){
+        /*if(floor==4){
           queue[0].order.dir=DOWN;
         }
         else if(floor==1){
           queue[0].order.dir=UP;
-        }
-				else if(floor>=currentFloor){
+        }*/
+				if(floor>currentFloor){
 					queue[0].order.dir=UP;
 				}else if(floor<currentFloor){
 					queue[0].order.dir=DOWN;
@@ -303,21 +303,23 @@ void optimizeQueue()
     else if(queue[0].order.floor<currentFloor){
       queue[0].order.dir=DOWN;
     }
-
   }
+
   for (int i=1;i<10;i++){
     if(queueEqual(queue[0],queue[i])){
       removeOrder(i);
       break;
     }
     if ((queue[0].order.dir==queue[i].order.dir)||(queue[i].order.dir==NONE)){
-      if (queue[0].order.dir==UP && queue[i].order.floor<=queue[0].order.floor && currentFloor<queue[i].order.floor){
-          queue[0].etasjestopp[queue[i].order.floor-1]=1;
+      if ((queue[0].order.dir==UP && currentFloor<queue[i].order.floor)&&queue[i].order.floor<=queue[0].order.floor)
+        //&& (queue[i].order.floor<=queue[0].order.floor ||queue[0].etasjestopp[3])) { //spesialtilfelle for endeetasje
+          {queue[0].etasjestopp[queue[i].order.floor-1]=1;
           removeOrder(i);
           break;
       }
-      else if (queue[0].order.dir==DOWN && queue[i].order.floor>=queue[0].order.floor && currentFloor>queue[i].order.floor){
-          queue[0].etasjestopp[queue[i].order.floor-1]=1;
+      else if ((queue[0].order.dir==DOWN && currentFloor>queue[i].order.floor)&&queue[i].order.floor>queue[0].order.floor)
+        //&& (queue[i].order.floor>queue[0].order.floor || queue[0].etasjestopp[0])) { //spesialtilfelle for endeetasje
+          {queue[0].etasjestopp[queue[i].order.floor-1]=1;
           removeOrder(i);
           break;
       }

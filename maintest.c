@@ -76,6 +76,13 @@ int main() {
             //printf("prevdir i stopp: %d \n", prevdir);
             printf("-----------\n");
             print_Orders();
+            //endrer retning for å kunne legge til fremtidige ordre, samt lys fungerer
+            if(queue[0].order.floor==4&&currentFloor==4&&queue.order.dir==UP){
+              queue[0].order.dir=DOWN;
+            }
+            else if(queue[0].order.floor==1&&currentFloor==1&&queue.order.dir==DOWN){
+              queue[0].order.dir=UP;
+            }
             stopElev();
             optimizeQueue();
             //printf("stopElevEnd\n");

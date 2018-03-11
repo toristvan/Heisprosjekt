@@ -71,7 +71,7 @@ int main() {
             executeOrder();
         }
            //denne funker ikke
-        if((queue[0].etasjestopp[currentFloor-1])&&(prevdir==0)){   // || (elev_get_obstruction_signal())
+        if((queue[0].floorstop[currentFloor-1])&&(prevdir==0)){   // || (elev_get_obstruction_signal())
             //printf("currentFloor: %d\n", currentFloor);
             //printf("prevdir i stopp: %d \n", prevdir);
             printf("-----------\n");
@@ -79,9 +79,9 @@ int main() {
             stopElev();
             optimizeQueue();
             //printf("stopElevEnd\n");
-            //printf("etasjestopp[0] %d\n", queue[0].etasjestopp[0]);
+            //printf("floorstop[0] %d\n", queue[0].floorstop[0]);
         }
-        
+
         if(orderFinished() && queue[0].valid && checkTimerFinished()){//endret her
             //printf("order finsihed");
             //printf("removeOrder");
@@ -91,7 +91,7 @@ int main() {
             printf("Etter remove: \n");
             print_Orders();
             //printf("startOptimizequeue: \n");
-            
+
             //printf("endOptimizequeue: \n");
             //elev_set_motor_direction(queue[0].order.dir);
           }
@@ -101,10 +101,10 @@ int main() {
       //print valid
       printf("valid %d\n", queue[0].valid);
       printf("currentFloor: %d\n", currentFloor);
-      printf("etasjestopp[0]: %d\n", queue[0].etasjestopp[0]);
-      printf("etasjestopp[1]: %d\n", queue[0].etasjestopp[1]);
-      printf("etasjestopp[2]: %d\n", queue[0].etasjestopp[2]);
-      printf("etasjestopp[3]: %d\n", queue[0].etasjestopp[3]);
+      printf("floorstop[0]: %d\n", queue[0].floorstop[0]);
+      printf("floorstop[1]: %d\n", queue[0].floorstop[1]);
+      printf("floorstop[2]: %d\n", queue[0].floorstop[2]);
+      printf("floorstop[3]: %d\n", queue[0].floorstop[3]);
       printf("order.dir queue[0]: %d\n", queue[0].order.dir);
       printf("order.dir queue[1]: %d\n", queue[1].order.dir);
 

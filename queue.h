@@ -1,6 +1,7 @@
 #include "elev.h"
 #include "io.h"
 #include "channels.h"
+#include "timer.h"
 #include <stdio.h>
 #include <sys/time.h>
 #include <string.h>
@@ -8,12 +9,12 @@
 
 double get_time(void);
 //global variables:
-//endtime used to determine if timer is finished
-static double endtime;
+//endTime used to determine if timer is finished
+static double endTime;
 //to keep track of current and recent floor
 int currentFloor;
 //to determine previous direction in case of emergency stop
-int prevdir;
+elev_motor_direction_t prevDir;
 //to check if elevator is at floor or in between floors
 int floorValid;
 
@@ -30,20 +31,22 @@ struct order_type{
    int floor;
  };
 
-//each element in the queue array is an internal_order.
- struct internal_order{
+//each element in the queue array is an external_order.
+ struct external_order{
    struct order_type order;
-   int etasjestopp[4];
+   int floorstop[4];
    int valid;
  };
 
 //queue array
- struct internal_order queue[10];
+ struct external_order queue[10];
 
 //deaclaring functions
  double get_time(void);
  void startTimer(double dur);
  int checkTimerFinished();
+ int order_typeEqual(struct order_type order_1, struct order_type order_2);
+ int external_orderEqual(struct external_order ext_order_1,struct external_order ext_order_2);
  void queueInit();
  void addExternalOrder(struct order_type neworder);
  void addInternalOrder(int floor);

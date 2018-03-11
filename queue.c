@@ -9,26 +9,26 @@ double get_time(void){
 
 
 void startTimer(double dur){
-	endtime=get_time()+dur;
+	endTime=get_time()+dur;
 }
 
 int checkTimerFinished(){
-	if(get_time()<endtime){
+	if(get_time()<endTime){
 	return 0;
 	}
 	return 1;
 }
 
-int orderEqual(struct order_type o1, struct order_type o2){
-  if (o1.dir==o2.dir && o1.floor==o2.floor){
+int order_typeEqual(struct order_type order_1, struct order_type order_2){
+  if (order_1.dir==order_2.dir && order_1.floor==order_2.floor){
     return 1;
   } else{
     return 0;
   }
 }
 
-int queueEqual(struct internal_order q1,struct internal_order q2){
-  if (orderEqual(q1.order,q2.order) && q1.etasjestopp==q2.etasjestopp){//evt valid.
+int external_orderEqual(struct external_order ext_order_1,struct external_order ext_order_2){
+  if (order_typeEqual(ext_order_1.order,ext_order_2.order) && (ext_order_1.floorstop==ext_order_2.floorstop)){
     return 1;
   } else{
     return 0;
@@ -39,107 +39,88 @@ void queueInit()
 {
   int i=0;
   while(queue[i].valid){
-  queue[i].order.dir=0; queue[i].order.floor=0;queue[i].valid=0;memset(queue[i].etasjestopp,0,sizeof(queue[i].etasjestopp));
+  queue[i].order.dir=0; queue[i].order.floor=0;queue[i].valid=0;memset(queue[i].floorstop,0,sizeof(queue[i].floorstop));
   i++;
   }
 }
 void addExternalOrder(struct order_type neworder)
 {
-  //printf("addexternal \n");
-    if (neworder.dir==queue[0].order.dir){
-      if (neworder.dir==UP && neworder.floor<queue[0].order.floor &&currentFloor<neworder.floor){
-          queue[0].etasjestopp[neworder.floor-1]=1;
-          return;
-        }
-        else if (neworder.dir==DOWN && neworder.floor>queue[0].order.floor && currentFloor>neworder.floor){
-          queue[0].etasjestopp[neworder.floor-1]=1;
-          return;
-        }
+  if (neworder.dir==queue[0].order.dir){
+    if (neworder.dir==UP && neworder.floor<queue[0].order.floor &&currentFloor<neworder.floor){
+    	queue[0].floorstop[neworder.floor-1]=1;
+      return;
     }
-    for (int i=0;i<10;i++){
-    if (!queue[i].valid){
+    else if (neworder.dir==DOWN && neworder.floor>queue[0].order.floor && currentFloor>neworder.floor){
+      queue[0].floorstop[neworder.floor-1]=1;
+      return;
+    }
+  }
+  for (int i=0;i<10;i++){
+  	if (!queue[i].valid){
       queue[i].order=neworder;
-      queue[i].etasjestopp[neworder.floor-1]=1;
+      queue[i].floorstop[neworder.floor-1]=1;
       queue[i].valid=1;
       return;
     }
     if(neworder.dir==queue[i].order.dir && neworder.floor==queue[i].order.floor){ //orderEqual(neworder,queue[i])
-      queue[i].etasjestopp[neworder.floor-1]=1;
+      queue[i].floorstop[neworder.floor-1]=1;
       return;
     }
-}
+	}
 }
 
 
-void addInternalOrder(int floor) { // fiks dette, vil nå ikke lage ny ordre over, hvis retning ned. Sjekk heis kjører.
+void addInternalOrder(int floor) {
   if((floor==currentFloor)&&(floorValid>-1)){
     stopElev();
     return;
   }
-  if ((io_read_bit(MOTORDIR)==1 && floor>=currentFloor)&&(queue[0].valid)) {//assert
-    int ind=0;
+  if ((io_read_bit(MOTORDIR)==1 && floor>currentFloor)&&(queue[0].valid)) {
+    int index=0;
     int temp_valid=1;
-    while((ind<9)&&(temp_valid==1)){
-      ind++;
-      //printf("que[ind].valid: %d\n", queue[ind].valid);
-      if(queue[ind].valid==0){
-          if (queue[ind-1].order.floor==floor)
-          {
-            temp_valid=0;
-          }else{
-          queue[ind].valid=1;
-          queue[ind].etasjestopp[floor-1]=1;
-          queue[ind].order.floor=floor;
-          queue[ind].order.dir=NONE;
-          //printf("if_index: %d\n", ind);
+    while((index<9)&&(temp_valid==1)){
+      index++;
+      if(queue[index].valid==0){
+        if (queue[index-1].order.floor==floor){
+          temp_valid=0;
+        }else{
+          queue[index].valid=1;
+          queue[index].floorstop[floor-1]=1;
+          queue[index].order.floor=floor;
+          queue[index].order.dir=NONE;
           temp_valid=0;
         }
       }
-
-      //printf("while_index: %d\n", ind);
-
     }
     return;
-  }
-  else if ((io_read_bit(MOTORDIR)==0 && floor<=currentFloor)&&(queue[0].valid)){
-    int ind=0;
+  }else if((io_read_bit(MOTORDIR)==0 && floor<currentFloor)&&(queue[0].valid)){
+    int index=0;
     int temp_valid=1;
-    while((ind<9)&&(temp_valid==1)){
-      ind++;
-      //printf("que[ind].valid: %d\n", queue[ind].valid);
-      if(queue[ind].valid==0){
-          if (queue[ind-1].order.floor==floor)
-          {
-            temp_valid=0;
-          }else{
-          queue[ind].valid=1;
-          queue[ind].etasjestopp[floor-1]=1;
-          queue[ind].order.floor=floor;
-          queue[ind].order.dir=NONE;
-          //printf("if2_index: %d\n", ind);
+    while((index<9)&&(temp_valid==1)){
+      index++;
+      if(queue[index].valid==0){
+        if (queue[index-1].order.floor==floor){
+        	temp_valid=0;
+        }else{
+          queue[index].valid=1;
+          queue[index].floorstop[floor-1]=1;
+          queue[index].order.floor=floor;
+          queue[index].order.dir=NONE;
           temp_valid=0;
-      }
-    }
-      //printf("while2_index: %d\n", ind);
+      	}
+    	}
     }
     return;
   }else{
-  		queue[0].etasjestopp[floor-1]=1;
+  		queue[0].floorstop[floor-1]=1;
       if((queue[0].order.dir==UP) && (floor>queue[0].order.floor)){
         queue[0].order.floor=floor;
-      }
-      else if((queue[0].order.dir==DOWN) && (floor<queue[0].order.floor)){
+      }else if((queue[0].order.dir==DOWN) && (floor<queue[0].order.floor)){
         queue[0].order.floor=floor;
       }
 			if(!queue[0].valid){
 				queue[0].valid=1;
 				queue[0].order.floor=floor;
-        /*if(floor==4){
-          queue[0].order.dir=DOWN;
-        }
-        else if(floor==1){
-          queue[0].order.dir=UP;
-        }*/
 				if(floor>currentFloor){
 					queue[0].order.dir=UP;
 				}else if(floor<currentFloor){
@@ -149,95 +130,57 @@ void addInternalOrder(int floor) { // fiks dette, vil nå ikke lage ny ordre ove
 		}
 }
 
-int orderFinished()
-{
-  return (queue[0].etasjestopp[0]==0 && queue[0].etasjestopp[1]==0 && queue[0].etasjestopp[2]==0 && queue[0].etasjestopp[3]==0);
+int orderFinished(){
+  return (queue[0].floorstop[0]==0 && queue[0].floorstop[1]==0 && queue[0].floorstop[2]==0 && queue[0].floorstop[3]==0);
 }
 
-void removeOrder(int index)
-{
-  int j=index;
-  int teller=j+1;
-  while(queue[teller].valid){
-    queue[teller-1].order.dir=queue[teller].order.dir;
-    queue[teller-1].order.floor=queue[teller].order.floor;
+void removeOrder(int index){
+  int i=index;
+  int counter=i+1;
+  while(queue[counter].valid){
+    queue[counter-1].order.dir=queue[counter].order.dir;
+    queue[counter-1].order.floor=queue[counter].order.floor;
     for (int k=0;k<4;k++){
-      queue[teller-1].etasjestopp[k]=queue[teller].etasjestopp[k];
+      queue[counter-1].floorstop[k]=queue[counter].floorstop[k];
     }
-    queue[teller-1].valid=queue[teller].valid;
-    j=teller;
-		teller++;
+    queue[counter-1].valid=queue[counter].valid;
+    i=counter;
+		counter++;
   }
-  queue[j].order.dir=0; queue[j].order.floor=0;queue[j].valid=0;memset(queue[j].etasjestopp,0,sizeof(queue[j].etasjestopp));
+  queue[i].order.dir=0; queue[i].order.floor=0;queue[i].valid=0;memset(queue[i].floorstop,0,sizeof(queue[i].floorstop));
 }
 
-
-
-
-
-/*
-
-  for (int i=index+1;i<sizeof(queue);i++){
-    queue[i-1].order.dir=queue[i].order.dir;
-    queue[i-1].order.floor=queue[i].order.floor;
-    for (int j=0;j<4;j++){
-      queue[i-1].etasjestopp[j]=queue[i].etasjestopp[j];
-    }
-    queue[i-1].valid=queue[i].valid;
-    j=i;
-  }
-  }
-  queue[j].order.dir=0; queue[j].order.floor=0;queue[j].valid=0;memset(queue[j].etasjestopp,0,sizeof(queue[j].etasjestopp));
-}
-*/
-
-void executeOrder()
-{ 
-  //Spesialtilfelle(Når heisen stoppes mellom etasjer)
-  if (prevdir!=0)
-  {
-    for (int i = 0; i <4; ++i)
-    {
-      if (queue[0].etasjestopp[i])
-      {
-        if (((currentFloor==1) || (prevdir==-1 && currentFloor==2))&&(i>0))//Mellom 1. og 2. etasje
-        {
-          elev_set_motor_direction(1);
-          printf("Case1; \n");
+void executeOrder(){
+  //Special case when emergency stop is activated in between floors
+  if (prevDir!=DIRN_STOP){
+    for (int i = 0; i <4; ++i){
+      if (queue[0].floorstop[i]){
+        if (((currentFloor==1) || (prevDir==DIRN_DOWN && currentFloor==2))&&(i>0)){ //between 1st and 2nd floor.
+          elev_set_motor_direction(DIRN_UP);
           return;
-        }
-        else if (((prevdir==1 && currentFloor==2) || (prevdir==-1 && currentFloor==3))&&(i>1))//Mellom 2. og 3. etasje
-        {
-          elev_set_motor_direction(1);
-          printf("Case2; \n");
+        }else if (((prevDir==DIRN_UP && currentFloor==2) || (prevDir==DIRN_DOWN && currentFloor==3))&&(i>1)){//between 2nd and 3rd floor.
+          elev_set_motor_direction(DIRN_UP);
           return;
-        }
-        else if (((currentFloor==4) || (prevdir==1 && currentFloor==3))&&(i>2))//Mellom 3. og 4. etasje
-        {
-          elev_set_motor_direction(1);
-          printf("Case3; \n");
+        }else if (((currentFloor==4) || (prevDir==DIRN_UP && currentFloor==3))&&(i>2)){//between 3rd and 4th floor.
+          elev_set_motor_direction(DIRN_UP);
           return;
-        }else
-        {
-        elev_set_motor_direction(-1);
-        printf("Case4; \n");
+        }else{
+        elev_set_motor_direction(DIRN_DOWN);
           return;
         }
       }
     }
-}
-  if(queue[0].etasjestopp[currentFloor-1]==1){ //endre order_dir_t til elev_motor_direction_t
+	}//special case end
+  if(queue[0].floorstop[currentFloor-1]==1){ //endre order_dir_t til elev_motor_direction_t
     elev_set_motor_direction(queue[0].order.dir);
-  }
-  else{
+  }else{
     for (int i=0; i<4;i++){
-      if(queue[0].etasjestopp[i]){
+      if (queue[0].floorstop[i]){
         if (i+1>currentFloor){
-          elev_set_motor_direction(1);
+          elev_set_motor_direction(DIRN_UP);
           break;
-        }     //else if
-        else{
-          elev_set_motor_direction(-1);
+        }else{
+          elev_set_motor_direction(DIRN_DOWN);
           break;
         }
       }
@@ -245,38 +188,33 @@ void executeOrder()
   }
 }
 
-void stopElev()
-{
-  //if(queue[0].etasjestopp[currentFloor-1]){
-    elev_set_motor_direction(0);
-    elev_set_door_open_lamp(1);
-    startTimer(3);
-    queue[0].etasjestopp[currentFloor-1]=0;
-    if((queue[0].order.dir==-1&&(currentFloor)>1)){ //evt !=1 for debugging 
-      elev_set_button_lamp(BUTTON_CALL_DOWN,currentFloor-1,0);
-    }
-    else if((queue[0].order.dir==1)&&(currentFloor<4)){    
-      elev_set_button_lamp(BUTTON_CALL_UP,currentFloor-1,0);
-    }
-    elev_set_button_lamp(BUTTON_COMMAND,currentFloor-1,0);
+void stopElev(){
+  elev_set_motor_direction(DIRN_STOP);
+  elev_set_door_open_lamp(1);
+  startTimer(3);
+  queue[0].floorstop[currentFloor-1]=0;
+  if((queue[0].order.dir==-1&&(currentFloor)>1)){
+    elev_set_button_lamp(BUTTON_CALL_DOWN,currentFloor-1,0);
+  }else if((queue[0].order.dir==1)&&(currentFloor<4)){
+    elev_set_button_lamp(BUTTON_CALL_UP,currentFloor-1,0);
+  }
+  elev_set_button_lamp(BUTTON_COMMAND,currentFloor-1,0);
 }
-void newOrder()
-{    //tar utgangspunkt i at kun én knapp trykkes inn om gangen.
+
+void newOrder(){
   struct order_type new_order;
   for (int floor=0;floor<4;floor++){
     for (elev_button_type_t button=BUTTON_CALL_UP;button<=BUTTON_COMMAND;button++){
       if((button==BUTTON_CALL_DOWN&&floor==0)||(button==BUTTON_CALL_UP&&floor==3)){
         continue;
       }
-      if(elev_get_button_signal(button,floor)){
-				// printf("floor: %d\n",floor);
-        elev_set_button_lamp(button,floor,1); //assert-fail, hvorfor får vi denne?
+			if(elev_get_button_signal(button,floor)){
+				elev_set_button_lamp(button,floor,1);
         new_order.floor=floor+1;
         if(button==0){
           new_order.dir=UP;
           addExternalOrder(new_order);
-        }
-        else if(button==1){
+        }else if(button==1){
           new_order.dir=DOWN;
           addExternalOrder(new_order);
         }else{
@@ -286,92 +224,60 @@ void newOrder()
       }
     }
   }
-
 }
 
 
-void optimizeQueue()
-{ //legg bare til i queue[0]
-  if(queue[0].order.dir==NONE){
-    if(queue[0].order.floor==4){
-      queue[0].order.dir=DOWN;
-    }
-    else if(queue[0].order.floor==1){
-      queue[0].order.dir=UP;
-    }
-    else if(queue[0].order.floor>currentFloor){ //hadde >=
-      queue[0].order.dir=UP;
-    }
-    else if(queue[0].order.floor<currentFloor){
-      queue[0].order.dir=DOWN;
-    }
-  }
-
+void optimizeQueue(){
+	if(queue[0].order.dir==NONE){
+  	if(queue[0].order.floor==4){
+    	queue[0].order.dir=DOWN;
+  	}else if(queue[0].order.floor==1){
+    	queue[0].order.dir=UP;
+  	}else if(queue[0].order.floor>currentFloor){
+    	queue[0].order.dir=UP;
+  	}else if(queue[0].order.floor<currentFloor){
+    	queue[0].order.dir=DOWN;
+  	}
+	}
   for (int i=1;i<10;i++){
-    if(queueEqual(queue[0],queue[i])){
+    if(external_orderEqual(queue[0],queue[i]) && queue[0].valid){
       removeOrder(i);
       break;
     }
     if ((queue[0].order.dir==queue[i].order.dir)||(queue[i].order.dir==NONE)){
-      if ((queue[0].order.dir==UP && currentFloor<queue[i].order.floor)&&queue[i].order.floor<=queue[0].order.floor)
-        //&& (queue[i].order.floor<=queue[0].order.floor ||queue[0].etasjestopp[3])) { //spesialtilfelle for endeetasje
-          {queue[0].etasjestopp[queue[i].order.floor-1]=1;
-          removeOrder(i);
-          break;
-      }
-      else if ((queue[0].order.dir==DOWN && currentFloor>queue[i].order.floor)&&queue[i].order.floor>queue[0].order.floor)
-        //&& (queue[i].order.floor>queue[0].order.floor || queue[0].etasjestopp[0])) { //spesialtilfelle for endeetasje
-          {queue[0].etasjestopp[queue[i].order.floor-1]=1;
-          removeOrder(i);
-          break;
+      if ((queue[0].order.dir==UP && currentFloor<queue[i].order.floor)&&queue[i].order.floor<=queue[0].order.floor){
+				queue[0].floorstop[queue[i].order.floor-1]=1;
+        removeOrder(i);
+        break;
+      }else if ((queue[0].order.dir==DOWN && currentFloor>queue[i].order.floor)&&queue[i].order.floor>queue[0].order.floor){
+				queue[0].floorstop[queue[i].order.floor-1]=1;
+        removeOrder(i);
+        break;
       }
     }
   }
 }
 
 void emergencyStop(){
-printf("--EMERGENCY STOP--\n");
-elev_set_stop_lamp(1);
-if(elev_get_floor_sensor_signal()==-1){ 
-  if(io_read_bit(MOTORDIR)==0){
-    prevdir=1;
-  }else{
-    prevdir=-1;
-  }
+	printf("--EMERGENCY STOP--\n");
+	elev_set_stop_lamp(1);
+	if(elev_get_floor_sensor_signal()==-1){
+  	if(io_read_bit(MOTORDIR)==0){
+    	prevDir=DIRN_UP;
+  	}else{
+    	prevDir=DIRN_DOWN;
+  	}
+	}
+	elev_set_motor_direction(DIRN_STOP);
+	elev_init();
+	queueInit();
+	if(elev_get_floor_sensor_signal()!=-1){
+  	elev_set_door_open_lamp(1);
+	}
+	while(elev_get_stop_signal()){
+		//stanser alt av dynamikk mens knapp holdes inne
+	}
+	elev_set_door_open_lamp(0);
+	elev_set_stop_lamp(0);
+	elev_set_floor_indicator(currentFloor-1);
 }
-elev_set_motor_direction(DIRN_STOP);
-elev_init();
-queueInit(); 
-if(elev_get_floor_sensor_signal()!=-1){
-  elev_set_door_open_lamp(1);
-}
-while(elev_get_stop_signal()){
-//stanser alt av dynamikk mens knapp holdes inne
-}
-elev_set_door_open_lamp(0);
-elev_set_stop_lamp(0);
-elev_set_floor_indicator(currentFloor-1);
-}
-
-
-void print_Orders(){
-int i=0;
-printf("Orders:\n");
-while(queue[i].valid){
-  printf("Queue[i]: i=%d\n", i);
-  printf("valid: %d\n", queue[i].valid);
-  printf("Order_Floor: %d\n", queue[i].order.floor);
-  printf("Order.dir: %d\n", queue[i].order.dir);
-  printf("etasjestopp[0]: %d\n", queue[i].etasjestopp[0]);
-  printf("etasjestopp[1]: %d\n", queue[i].etasjestopp[1]);
-  printf("etasjestopp[2]: %d\n", queue[i].etasjestopp[2]);
-  printf("etasjestopp[3]: %d\n", queue[i].etasjestopp[3]);
-  printf("\n");
-  i++;
-}
-
-
-}
-
-
-

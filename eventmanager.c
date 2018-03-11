@@ -64,7 +64,7 @@ void stopElev(){
 void emergencyStop(){
 	printf("--EMERGENCY STOP--\n");
 	elev_set_stop_lamp(1);
-	if(elev_get_floor_sensor_signal()==-1){
+	if((elev_get_floor_sensor_signal()==-1) && (prevDir==DIRN_STOP)){
   	if(io_read_bit(MOTORDIR)==0){
     	prevDir=DIRN_UP;
   	}else{

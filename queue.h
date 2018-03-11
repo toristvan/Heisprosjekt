@@ -2,23 +2,17 @@
 #include "io.h"
 #include "channels.h"
 #include "timer.h"
+#include "eventmanager.h"
 #include <stdio.h>
-#include <sys/time.h>
 #include <string.h>
 
-
-double get_time(void);
-//global variables:
-//endTime used to determine if timer is finished
-static double endTime;
-//to keep track of current and recent floor
-int currentFloor;
-//to determine previous direction in case of emergency stop
-elev_motor_direction_t prevDir;
-//to check if elevator is at floor or in between floors
-int floorValid;
-
 //direction of order
+//we chose not to use elev_motor_direction_t here because we believe it is more accurate
+//that an order direction is different than a motor direction,
+//especially since order_dir_t=0 means no specific direction, and
+//elev_motor_direction_t=0 means stop.
+//Has equal values, so we can use them in place of each other.
+//gives warning in code, but will not lead to error.
 typedef enum tag_order_dir{
   DOWN=-1,
   NONE=0,
@@ -41,10 +35,8 @@ struct order_type{
 //queue array
  struct external_order queue[10];
 
-//deaclaring functions
- double get_time(void);
- void startTimer(double dur);
- int checkTimerFinished();
+
+//declaring functions
  int order_typeEqual(struct order_type order_1, struct order_type order_2);
  int external_orderEqual(struct external_order ext_order_1,struct external_order ext_order_2);
  void queueInit();
@@ -52,9 +44,5 @@ struct order_type{
  void addInternalOrder(int floor);
  int orderFinished();
  void removeOrder(int index);
- void executeOrder();
- void stopElev();
  void newOrder();
  void optimizeQueue();
- void print_Orders();
- void emergencyStop();

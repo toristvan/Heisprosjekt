@@ -1,6 +1,4 @@
-//#include "elev.h"
 #include "queue.h"
-//#include <stdio.h>
 
 
 int main() {
@@ -21,12 +19,7 @@ int main() {
     //The main elevetaor sequence begins here.
     while (1) {
         //contionously updating currentFloor and floor indicators.
-      floorValid=elev_get_floor_sensor_signal();
-      if(floorValid>-1){
-        prevDir=DIRN_STOP;
-        currentFloor =  floorValid+1;
-        elev_set_floor_indicator(currentFloor-1);
-        }
+        updateFloor();
 
         //checking for pressed buttons, adding orders to queue and optimizing queue.
         newOrder();
@@ -43,8 +36,8 @@ int main() {
             executeOrder();
         }
         //stopping elevator when ordered floor is reached, and reactivates in case of obstruction.
-        if((queue[0].floorstop[currentFloor-1] && prevDir==DIRN_STOP)
-            ||(elev_get_obstruction_signal() && !checkTimerFinished())){
+        if(((queue[0].floorstop[currentFloor-1] && prevDir==DIRN_STOP)
+            ||(elev_get_obstruction_signal() && !checkTimerFinished())) && floorValid>-1){
             stopElev();
             optimizeQueue();
         }

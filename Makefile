@@ -8,7 +8,7 @@ CFLAGS = -g -Wall
 LDFLAGS = -lcomedi -lm
 
 # list of sources
-ELEVSRC = elev.c io.c main.c queue.c
+ELEVSRC = elev.c io.c main.c queue.c timer.c eventmanager.c
 
 # program executable file name.
 TARGET = heis
@@ -25,7 +25,7 @@ $(TARGET): $(ELEVOBJ)
 
 # Compile: create object files from C source files.
 %.o : %.c
-	$(CC) $(CFLAGS) -c $< -o $@ 
+	$(CC) $(CFLAGS) -c $< -o $@
 
 # rule for cleaning re-compilable files.
 clean:

@@ -74,6 +74,7 @@ void emergencyStop(){
 	elev_set_motor_direction(DIRN_STOP);
 	elev_init();
 	queueInit();
+  elev_set_stop_lamp(1);
 	if(elev_get_floor_sensor_signal()!=-1){
   	elev_set_door_open_lamp(1);
 	}
